@@ -16,12 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.views import SurvivorView
+from api.views import SurvivorViewSet
 
 router = DefaultRouter()
-router.register(r'survivors', SurvivorView, basename='survivor')
+router.register(r'survivors', SurvivorViewSet, basename='survivor')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls))
+    path('api/v1/', include(router.urls))
 ]
