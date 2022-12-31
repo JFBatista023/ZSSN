@@ -1,12 +1,12 @@
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from api.models import Survivor, Item
 from api.serializers import SurvivorSerializer, InventorySerializer
 
 
-class SurvivorView(APIView):
-    def post(self, request):
+class SurvivorView(ViewSet):
+    def create(self, request):
         survivor = request.data['survivor']
         inventory_items = request.data['inventory']['items']
 
@@ -27,7 +27,7 @@ class SurvivorView(APIView):
         else:
             return Response(data=inventory_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
+    def destroy(self, request, pk):
         survivor = Survivor.objects.get(pk=pk)
 
         if survivor:
