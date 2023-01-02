@@ -12,7 +12,7 @@ class SurvivorViewSet(ViewSet):
 
     def list(self, request):
         survivors = Survivor.objects.all()
-        data = SurvivorSerializer(survivors).data
+        data = SurvivorSerializer(survivors, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
@@ -131,6 +131,10 @@ class SurvivorViewSet(ViewSet):
                 'points__sum']
 
         return Response(data={"lost_points": lost_points, "remaining_points": remaining_points}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path='trade', url_name='survivors-trade')
+    def trade(self, request):
+        ...
 
     def partial_update(self, request, pk=None):
         coordinates = request.data['coordinates']
