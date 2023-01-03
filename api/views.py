@@ -44,6 +44,34 @@ class SurvivorViewSet(ViewSet):
         else:
             return Response(data=inventory_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # Just for insert mock data
+    @action(detail=False, methods=['POST'], url_path='create-many', url_name='survivors-create-many')
+    def create_many(self, request):
+        survivors = request.data['survivors']
+        for item in survivors:
+            survivor = item['survivor']
+            inventory_items = item['inventory']['items']
+
+            survivor_serializer = SurvivorSerializer(data=survivor)
+            if survivor_serializer.is_valid():
+                survivor = survivor_serializer.save()
+
+            inventory = {}
+            inventory['survivor'] = survivor.id
+            inventory['items'] = [Item.objects.get(
+                name=item).id for item in inventory_items]
+            inventory_serializer = InventorySerializer(data=inventory)
+            if inventory_serializer.is_valid():
+                inventory_serializer.save()
+        return Response(status=status.HTTP_200_OK)
+
+    # Just for delete mock data
+    @action(detail=False, methods=['DELETE'], url_path='delete-all', url_name='survivors-delete-all')
+    def delete_all(self, request):
+        survivors = Survivor.objects.all()
+        survivors.delete()
+        return Response(status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['PATCH'], url_path='report', url_name='survivors-report')
     def report(self, request, pk=None):
         survivor = Survivor.objects.filter(pk=pk)
