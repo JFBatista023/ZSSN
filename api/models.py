@@ -2,8 +2,14 @@ from django.db import models
 
 
 class Survivor(models.Model):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+    )
+
     name = models.CharField(max_length=200)
     age = models.IntegerField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     is_infected = models.BooleanField(default=False, blank=True)
     reports = models.IntegerField(default=0, blank=True)
     latitude = models.DecimalField(max_digits=6, decimal_places=4)

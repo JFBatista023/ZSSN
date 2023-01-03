@@ -2,10 +2,13 @@ import { Card, Button, Typography, CardContent, CardActions, CardMedia,Chip, Box
 import axios from "axios";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 const Survivors = () => {
     const [survivors, setSurvivors] = useState([]);
     const [survivorsSearch, setSurvivorsSearch] = useState([]);
+
+    const navigate = useNavigate();
 
     const sortSurvivors = (survivors) => {
         return survivors.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
@@ -43,6 +46,9 @@ const Survivors = () => {
     return (
         <>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, width: "100%", position: "absolute", top: 0, left: 0, right: 0}}>
+                <Button size="medium" color="primary" sx={{mr: 3}} variant="contained">Trades</Button>
+                <Button size="medium" color="success" sx={{mr: 3}} variant="contained" onClick={() => navigate("/create")}>Create Survivor</Button>
+
                 <Autocomplete
                     multiple
                     options={survivorsSearch}
@@ -55,6 +61,7 @@ const Survivors = () => {
                             getAllSurvivors();
                         }
                     }}
+                    limitTags={2}
                     renderInput={(params) => (
                         <TextField
                             {...params}
@@ -65,7 +72,7 @@ const Survivors = () => {
                             }}
                         />
                     )}
-                    sx={{width: "700px",["@media (max-width:750px)"]: {
+                    sx={{width: "500px",["@media (max-width:750px)"]: {
                         width: "450px",
                     }
                     }}
@@ -75,26 +82,34 @@ const Survivors = () => {
             <Box sx={{display: "flex", alignItems: "flex-start", justifyContent: "flex-start", flexDirection: "row", ml: 5, mt: 15, flexWrap: "wrap", gap: 2}}>
                 {survivors.map((survivor) => (
                     <Box key={survivor.id}>
-                        <Card sx={{ width: 300, height: 350 }}>
+                        <Card sx={{ width: 300, height: 354 }}>
                             {survivor.is_infected ? <CardMedia
                                 sx={{ height: 140, width: "100%" }}
-                                image="public/zombie.jpg"
+                                image="/zombie.jpg"
                                 title="zombie"
+                            /> : (survivor.gender == "M" ? <CardMedia
+                                sx={{ height: 140, width: "100%" }}
+                                image="/survivor-male.jpg"
+                                title="survivor healthy"
                             /> : <CardMedia
                                 sx={{ height: 140, width: "100%" }}
-                                image="public/survivor.jpg"
+                                image="/survivor-female.jpg"
                                 title="survivor healthy"
-                            />}
+                            />)}
 
                             <CardContent>
 
-                                <Typography gutterBottom variant="h5" component="div" sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                <Typography gutterBottom variant="h5" component="div" sx={{display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "20px"}}>
                                     {survivor.name}
                                     {survivor.is_infected ? <Chip label="Infected" color="error" size="small" /> :  <Chip label="Healthy" color="success" size="small" />}
                                 </Typography>
 
                                 <Typography variant="body2" color="text.secondary" >
                                 Age: {survivor.age}
+                                </Typography>
+
+                                <Typography variant="body2" color="text.secondary" >
+                                Gender: {survivor.gender}
                                 </Typography>
 
                                 <Typography variant="body2" color="text.secondary" >
