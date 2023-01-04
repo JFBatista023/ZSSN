@@ -27,4 +27,11 @@ class Item(models.Model):
 class Inventory(models.Model):
     survivor = models.OneToOneField(
         Survivor, on_delete=models.CASCADE)
-    items = models.ManyToManyField(Item)
+    items = models.ManyToManyField(
+        Item, through='QuantityItem', through_fields=('inventory', 'item'))
+
+
+class QuantityItem(models.Model):
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField()

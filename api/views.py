@@ -4,8 +4,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
-from api.models import Survivor, Inventory, Item
-from api.serializers import SurvivorSerializer, InventorySerializer
+from api.models import Survivor, Inventory, Item, QuantityItem
+from api.serializers import SurvivorSerializer, InventorySerializer, QuantityItemSerializer
 
 
 class SurvivorViewSet(ViewSet):
@@ -33,16 +33,19 @@ class SurvivorViewSet(ViewSet):
         else:
             return Response(data=survivor_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        inventory = {}
-        inventory['survivor'] = survivor.id
-        inventory['items'] = [Item.objects.get(
-            name=item).id for item in inventory_items]
-        inventory_serializer = InventorySerializer(data=inventory)
-        if inventory_serializer.is_valid():
-            inventory_serializer.save()
-            return Response(data=survivor_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(data=inventory_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        inventory_object = Inventory.objects.create(survivor=survivor)
+
+        for item_name, item_quantity in inventory_items.items():
+            if item_quantity:
+                quantity_serializer = QuantityItemSerializer(
+                    data={"quantity": item_quantity, "inventory": inventory_object.id, "item": Item.objects.get(name=item_name).id})
+                if quantity_serializer.is_valid():
+                    quantity_serializer.save()
+                else:
+                    Survivor.objects.get(pk=survivor.id).delete()
+                    return Response(data=quantity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(data=survivor_serializer.data, status=status.HTTP_201_CREATED)
 
     # Just for insert mock data
     @action(detail=False, methods=['POST'], url_path='create-many', url_name='survivors-create-many')
@@ -56,13 +59,16 @@ class SurvivorViewSet(ViewSet):
             if survivor_serializer.is_valid():
                 survivor = survivor_serializer.save()
 
-            inventory = {}
-            inventory['survivor'] = survivor.id
-            inventory['items'] = [Item.objects.get(
-                name=item).id for item in inventory_items]
-            inventory_serializer = InventorySerializer(data=inventory)
-            if inventory_serializer.is_valid():
-                inventory_serializer.save()
+            inventory_object = Inventory.objects.create(survivor=survivor)
+
+            for item_name, item_quantity in inventory_items.items():
+                quantity_serializer = QuantityItemSerializer(
+                    data={"quantity": item_quantity, "inventory": inventory_object.id, "item": Item.objects.get(name=item_name).id})
+                if quantity_serializer.is_valid():
+                    quantity_serializer.save()
+                else:
+                    Survivor.objects.get(pk=survivor.id).delete()
+                    return Response(data=quantity_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
 
     # Just for delete mock data
