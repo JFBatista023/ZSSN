@@ -45,8 +45,8 @@ const Survivors = () => {
 
     return (
         <>
-            <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, width: "100%", position: "absolute", top: 0, left: 0, right: 0}}>
-                <Button size="medium" color="primary" sx={{mr: 3}} variant="contained">Trades</Button>
+            <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, ml: 11, width: "900px", position: "absolute", top: 0, left: 0, right: 0}}>
+                <Button size="medium" color="primary" sx={{mr: 3}} variant="contained" onClick={() => navigate("/trades")}>Trades</Button>
                 <Button size="medium" color="success" sx={{mr: 3}} variant="contained" onClick={() => navigate("/create")}>Create Survivor</Button>
 
                 <Autocomplete
