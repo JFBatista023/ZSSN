@@ -18,9 +18,26 @@ class SurvivorViewSet(ViewSet):
     def retrieve(self, request, pk=None):
         survivor = Survivor.objects.filter(pk=pk)
         if survivor.exists():
+            data = {}
+
             survivor = survivor.get()
             survivor_serializer = SurvivorSerializer(survivor)
-            return Response(data=survivor_serializer.data, status=status.HTTP_200_OK)
+            data['survivor'] = survivor_serializer.data
+
+            inventory = Inventory.objects.get(survivor_id=survivor.id)
+            items = QuantityItem.objects.filter(inventory_id=inventory.id)
+            data['inventory'] = {"items": {}}
+            data['inventory']['items']['total_points'] = 0
+            for item in items:
+                data['inventory']['items'][item.item.name] = {
+                    "quantity": item.quantity,
+                    "points_per_unit": item.item.points,
+                    "total_points_item": item.quantity * item.item.points
+                }
+                data['inventory']['items']['total_points'] += item.quantity * \
+                    item.item.points
+
+            return Response(data=data, status=status.HTTP_200_OK)
         return Response({"message": "No survivors found."}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
