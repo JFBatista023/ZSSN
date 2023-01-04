@@ -123,14 +123,14 @@ class SurvivorViewSet(ViewSet):
         return Response(data={"percentage_infected": f"{percentage_infected:.0f}%"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path='info/healthy', url_name='survivors-info-healthy')
-    def percentage_not_infected(self, request):
+    def percentage_healthy(self, request):
         survivors = Survivor.objects.all()
-        survivors_not_infected = Survivor.objects.filter(is_infected=False)
+        survivors_healthy = Survivor.objects.filter(is_infected=False)
 
-        percentage_not_infected = (
-            survivors_not_infected.count() / survivors.count()) * 100
+        percentage_healthy = (
+            survivors_healthy.count() / survivors.count()) * 100
 
-        return Response(data={"percentage_not_infected": f"{percentage_not_infected:.0f}%"}, status=status.HTTP_200_OK)
+        return Response(data={"percentage_healthy": f"{percentage_healthy:.0f}%"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path='info/items', url_name='survivors-info-items')
     def average_items(self, request):

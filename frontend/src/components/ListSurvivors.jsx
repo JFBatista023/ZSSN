@@ -1,12 +1,86 @@
-import { Card, Button, Typography, CardContent, CardActions, CardMedia,Chip, Box, Autocomplete, TextField } from "@mui/material";
+import { Card, Button, Typography, CardContent, CardActions, CardMedia,Chip, Box, Autocomplete, TextField, Modal } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 
+const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "1px solid #000",
+    boxShadow: 24,
+    p: 4,
+};
+
 const Survivors = () => {
     const [survivors, setSurvivors] = useState([]);
     const [survivorsSearch, setSurvivorsSearch] = useState([]);
+
+    const [percentageInfected, setPercentageInfected] = useState("0%");
+    const [percentageHealthy, setPercentageHealthy] = useState("0%");
+    const [waterPerSurvivor, setWaterPerSurvivor] = useState(0);
+    const [foodPerSurvivor, setFoodPerSurvivor] = useState(0);
+    const [medicationPerSurvivor, setMedicationPerSurvivor] = useState(0);
+    const [ammoPerSurvivor, setAmmoPerSurvivor] = useState(0);
+    const [lostPoints, setLostPoints] = useState(0);
+    const [remainingPoints, setRemainingPoints] = useState(0);
+
+    const getPercentageInfected = async () => {
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/infected/")
+            .then((response) => {
+                if (response.status == 200) {
+                    setPercentageInfected(response.data["percentage_infected"]);
+                } else {
+                    console.log(response);
+                }
+            }).catch((e) => console.log(e));
+    };
+
+    const getPercentageHealthy = async () => {
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/healthy/")
+            .then((response) => {
+                if (response.status == 200) {
+                    setPercentageHealthy(response.data["percentage_healthy"]);
+                } else {
+                    console.log(response);
+                }
+            }).catch((e) => console.log(e));
+    };
+
+    const getItemsPerSurvivor = async () => {
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/items")
+            .then((response) => {
+                if (response.status == 200) {
+                    const items = response.data["average_items"];
+                    setWaterPerSurvivor(items["water_per_survivor"]);
+                    setFoodPerSurvivor(items["food_per_survivor"]);
+                    setMedicationPerSurvivor(items["medication_per_survivor"]);
+                    setAmmoPerSurvivor(items["ammo_per_survivor"]);
+                } else {
+                    console.log(response);
+                }
+            }).catch((e) => console.log(e));
+    };
+
+    const getPoints = async () => {
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/points/")
+            .then((response) => {
+                if (response.status == 200) {
+                    setLostPoints(response.data["lost_points"]);
+                    setRemainingPoints(response.data["remaining_points"]);
+                } else {
+                    console.log(response);
+                }
+            }).catch((e) => console.log(e));
+    };
+
+    const [open, setOpen] = useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const navigate = useNavigate();
 
@@ -39,13 +113,18 @@ const Survivors = () => {
     };
 
     useEffect(() => {
-        document.title = "Survivors";
+        document.title = "Survivors | List";
+        getPercentageInfected();
+        getPercentageHealthy();
+        getItemsPerSurvivor();
+        getPoints();
         getAllSurvivors();
     }, []);
 
     return (
         <>
-            <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, ml: 11, width: "900px", position: "absolute", top: 0, left: 0, right: 0}}>
+            <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, ml: 11, width: "950px", position: "absolute", top: 0, left: 0, right: 0}}>
+                <Button size="medium" color="info" sx={{mr: 3}} variant="contained" onClick={() => handleOpen()}>Infos</Button>
                 <Button size="medium" color="primary" sx={{mr: 3}} variant="contained" onClick={() => navigate("/trades")}>Trades</Button>
                 <Button size="medium" color="success" sx={{mr: 3}} variant="contained" onClick={() => navigate("/create")}>Create Survivor</Button>
 
@@ -138,6 +217,22 @@ const Survivors = () => {
                     </Box>
                 ))}
             </Box>
+
+            <Modal
+                open={open}
+                onClose={handleClose}
+            >
+                <Box sx={style}>
+                    <Typography>Percentage of infected survivors: {percentageInfected}</Typography>
+                    <Typography sx={{ mt: 2 }}>Percentage of healthy survivors: {percentageHealthy}</Typography>
+                    <Typography sx={{ mt: 2 }}>Water per survivor: {waterPerSurvivor}</Typography>
+                    <Typography sx={{ mt: 2 }}>Food per survivor: {foodPerSurvivor}</Typography>
+                    <Typography sx={{ mt: 2 }}>Medication per survivor: {medicationPerSurvivor}</Typography>
+                    <Typography sx={{ mt: 2 }}>Ammo per survivor: {ammoPerSurvivor}</Typography>
+                    <Typography sx={{ mt: 2 }}>Lost points: {lostPoints}</Typography>
+                    <Typography sx={{ mt: 2 }}>Remaining Points: {remainingPoints}</Typography>
+                </Box>
+            </Modal>
         </>
     );
 };
