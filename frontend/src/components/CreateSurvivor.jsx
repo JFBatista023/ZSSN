@@ -1,6 +1,7 @@
 import { Box, Paper, TextField, Typography, Button } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 const CreateSurvivor = () => {
     const [name, setName] = useState("");
@@ -14,6 +15,8 @@ const CreateSurvivor = () => {
     const [food, setFood] = useState(0);
     const [medication, setMedication] = useState(0);
     const [ammo, setAmmo] = useState(0);
+
+    const [regSucess, setRegSucess] = useState(false);
 
     useEffect(() => {
         document.title = "Survivors | Create";
@@ -41,76 +44,81 @@ const CreateSurvivor = () => {
         }).then((response) => {
             if (response.status == 201) {
                 console.log(response.data);
+                setRegSucess(true);
             }
         }).catch((err) => console.log(err));
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit}>
-            <Paper elevation={3} sx={{display: "flex", alignItems: "center", justifyContent: "center", gap: 2, width: "600px", height: "390px", ml: 47}}>
-                <Box sx={{display: "flex", alignItems: "flex-start", flexDirection: "column", gap: 2}}>
-                    <Typography sx={{ml: 7}}> Create Survivor </Typography>
+        <>
+            {regSucess && <Navigate to="/" replace={true} />}
 
-                    <TextField size="small" label="Name" value={name} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setName(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Age" value={age} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setAge(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Gender" value={gender} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setGender(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Latitude" value={latitude} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setLatitude(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Longitude" value={longitude} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setLongitude(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Birth Date" value={birthDate} type="date" InputLabelProps={{shrink: true}} fullWidth
-                        onChange={(event) => {
-                            setBirthDate(event.target.value);
-                        }}
-                    ></TextField>
-                </Box>
+            <Box component="form" onSubmit={handleSubmit}>
+                <Paper elevation={3} sx={{display: "flex", alignItems: "center", justifyContent: "center", gap: 2, width: "600px", height: "390px", ml: 47}}>
+                    <Box sx={{display: "flex", alignItems: "flex-start", flexDirection: "column", gap: 2}}>
+                        <Typography sx={{ml: 7}}> Create Survivor </Typography>
 
-                <Box sx={{display: "flex", alignItems: "flex-start", mb: 14, flexDirection: "column", gap: 2}}>
-                    <Typography sx={{ml: 7}}> Inventory Items </Typography>
+                        <TextField size="small" label="Name" value={name} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setName(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Age" value={age} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setAge(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Gender" value={gender} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setGender(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Latitude" value={latitude} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setLatitude(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Longitude" value={longitude} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setLongitude(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Birth Date" value={birthDate} type="date" InputLabelProps={{shrink: true}} fullWidth
+                            onChange={(event) => {
+                                setBirthDate(event.target.value);
+                            }}
+                        ></TextField>
+                    </Box>
 
-                    <TextField size="small" label="Quantity of Water" value={water == 0 ? "" : water} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setWater(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Quantity of Food" value={food == 0 ? "" : food} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setFood(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Quantity of Medication" value={medication == 0 ? "" : medication} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setMedication(event.target.value);
-                        }}
-                    ></TextField>
-                    <TextField size="small" label="Quantity of Ammo" value={ammo == 0 ? "" : ammo} InputLabelProps={{shrink: true}}
-                        onChange={(event) => {
-                            setAmmo(event.target.value);
-                        }}
-                    ></TextField>
-                </Box>
-            </Paper>
+                    <Box sx={{display: "flex", alignItems: "flex-start", mb: 14, flexDirection: "column", gap: 2}}>
+                        <Typography sx={{ml: 7}}> Inventory Items </Typography>
 
-            <Button size="medium" type="submit" color="success" variant="contained" sx={{ml: "65%", mt: 2}}>Create</Button>
-        </Box>
+                        <TextField size="small" label="Quantity of Water" value={water == 0 ? "" : water} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setWater(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Food" value={food == 0 ? "" : food} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setFood(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Medication" value={medication == 0 ? "" : medication} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setMedication(event.target.value);
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Ammo" value={ammo == 0 ? "" : ammo} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                setAmmo(event.target.value);
+                            }}
+                        ></TextField>
+                    </Box>
+                </Paper>
+
+                <Button size="medium" type="submit" color="success" variant="contained" sx={{ml: "65%", mt: 2}}>Create</Button>
+            </Box>
+        </>
     );
 };
 

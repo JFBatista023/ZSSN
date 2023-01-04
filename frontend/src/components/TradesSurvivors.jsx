@@ -1,10 +1,11 @@
-import { Autocomplete, Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Button, Chip } from "@mui/material";
+import { Autocomplete, Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Button, Chip, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 import LocalDrinkIcon from "@mui/icons-material/LocalDrink";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import MedicationIcon from "@mui/icons-material/Medication";
+import { useNavigate } from "react-router-dom";
 
 
 const TradesSurvivors = () => {
@@ -12,36 +13,36 @@ const TradesSurvivors = () => {
     const [survivor1, setSurvivor1] = useState({});
     const [survivor2, setSurvivor2] = useState({});
 
-    const [disableInput1, setDisableInput1] = useState(false);
-    const [disableInput2, setDisableInput2] = useState(false);
-
     const [color, setColor] = useState("default");
 
-    const changeSurvivor1 = () => {
-        setDisableInput1(false);
-        setSurvivor1({});
-    };
-
-    const changeSurvivor2 = () => {
-        setDisableInput2(false);
-        setSurvivor2({});
-    };
+    const navigate = useNavigate();
 
     const tradeItems = async () => {
-        await axios.get("http://127.0.0.1:8000/api/v1/survivors/trade/")
-            .then((response) => {
-                if (response.status == 200) {
-                    setSurvivor1(response.data);
-                } else {
-                    console.log(response);
-                }
-            }).catch((e) => console.log(e));
+        if (survivor2.inventory?.items.total_points != survivor1.inventory?.items.total_points) {
+            setColor("error");
+            return;
+        }
+
+        await axios.post("http://127.0.0.1:8000/api/v1/survivors/trade/", {
+            "survivor1": survivor1,
+            "survivor2": survivor2,
+        }).then((response) => {
+            if (response.status == 200) {
+                setColor("success");
+                setTimeout(function() {
+                    navigate("/");
+                }, 3000);
+            } else {
+                console.log(response);
+            }
+        }).catch((e) => console.log(e));
     };
 
     const getSurvivor1 = async (id) => {
         await axios.get(`http://127.0.0.1:8000/api/v1/survivors/${id}/`)
             .then((response) => {
                 if (response.status == 200) {
+                    setColor("default");
                     setSurvivor1(response.data);
                 } else {
                     console.log(response);
@@ -53,6 +54,7 @@ const TradesSurvivors = () => {
         await axios.get(`http://127.0.0.1:8000/api/v1/survivors/${id}/`)
             .then((response) => {
                 if (response.status == 200) {
+                    setColor("default");
                     setSurvivor2(response.data);
                 } else {
                     console.log(response);
@@ -60,8 +62,8 @@ const TradesSurvivors = () => {
             }).catch((e) => console.log(e));
     };
 
-    const getAllSurvivors = async () => {
-        await axios.get("http://127.0.0.1:8000/api/v1/survivors")
+    const getAllSurvivorsHealthy = async () => {
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/healthys/")
             .then((response) => {
                 if (response.status == 200) {
                     setSurvivors(response.data);
@@ -73,13 +75,14 @@ const TradesSurvivors = () => {
 
     useEffect(() => {
         document.title = "Survivors | Trades";
-        getAllSurvivors();
+        getAllSurvivorsHealthy();
     }, []);
 
     return (
         <>
             <Box sx={{display: "flex", aligItems: "flex-start", justifyContent: "space-between", gap: 12}}>
                 <Paper elevation={3} sx={{display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 2, width: "620px", height: "500px", ml: 2}}>
+                    <Typography>Survivor 1</Typography>
                     <Autocomplete
                         multiple
                         options={survivors}
@@ -88,10 +91,8 @@ const TradesSurvivors = () => {
                             if (value.length > 1) {
                                 value.shift();
                             }
-                            setDisableInput1(true);
                             getSurvivor1(value[0].id);
                         }}
-                        disabled={disableInput1}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -143,11 +144,12 @@ const TradesSurvivors = () => {
                         </ListItem>
                     </List>
 
-                    <Chip color="default" size="medium" label={`Total Points: ${survivor1.inventory?.items.total_points ?? 0}`} />
-                    <Button size="medium" color="primary" onClick={() => changeSurvivor1()} variant="contained">Change Survivor</Button>
+                    <Chip color={color} size="medium" label={`Total Points: ${survivor1.inventory?.items.total_points ?? 0}`} />
                 </Paper>
 
                 <Paper elevation={3} sx={{display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 2, width: "620px", height: "500px"}}>
+                    <Typography>Survivor 2</Typography>
+
                     <Autocomplete
                         multiple
                         options={survivors}
@@ -156,10 +158,8 @@ const TradesSurvivors = () => {
                             if (value.length > 1) {
                                 value.shift();
                             }
-                            setDisableInput2(true);
                             getSurvivor2(value[0].id);
                         }}
-                        disabled={disableInput2}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -211,10 +211,10 @@ const TradesSurvivors = () => {
                         </ListItem>
                     </List>
 
-                    <Chip color="default" size="medium" label={`Total Points: ${survivor2.inventory?.items.total_points ?? 0}`} />
-                    <Button size="medium" color="primary" onClick={() => changeSurvivor2()} variant="contained">Change Survivor</Button>
+                    <Chip color={color} size="medium" label={`Total Points: ${survivor2.inventory?.items.total_points ?? 0}`} />
                 </Paper>
             </Box>
+            <Button sx={{ml: 80, mt: 5}} size="medium" color="primary" onClick={() => tradeItems()} variant="contained">Trade</Button>
         </>
     );
 };

@@ -15,6 +15,12 @@ class SurvivorViewSet(ViewSet):
         data = SurvivorSerializer(survivors, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path='healthys', url_name='survivors-healthy')
+    def survivors_healthy(self, request):
+        survivors = Survivor.objects.filter(is_infected=False)
+        data = SurvivorSerializer(survivors, many=True).data
+        return Response(data=data, status=status.HTTP_200_OK)
+
     def retrieve(self, request, pk=None):
         survivor = Survivor.objects.filter(pk=pk)
         if survivor.exists():
@@ -150,16 +156,16 @@ class SurvivorViewSet(ViewSet):
                 name='medication').count()
             quant_ammo += survivor_items.filter(name='ammo').count()
 
-        avg_water = quant_water // survivors_not_infected.count()
-        avg_food = quant_food // survivors_not_infected.count()
-        avg_medication = quant_medication // survivors_not_infected.count()
-        avg_ammo = quant_ammo // survivors_not_infected.count()
+        avg_water = quant_water / survivors_not_infected.count()
+        avg_food = quant_food / survivors_not_infected.count()
+        avg_medication = quant_medication / survivors_not_infected.count()
+        avg_ammo = quant_ammo / survivors_not_infected.count()
 
         return Response(data={"averages_items": {
-            "water_per_survivor": avg_water,
-            "food_per_survivor": avg_food,
-            "medication_per_survivor": avg_medication,
-            "ammo_per_survivor": avg_ammo,
+            "water_per_survivor": f"{avg_water:.2f}",
+            "food_per_survivor": f"{avg_food:.2f}",
+            "medication_per_survivor": f"{avg_medication:.2f}",
+            "ammo_per_survivor": f"{avg_ammo:.2f}",
         }}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path='info/points', url_name='survivors-info-points')
@@ -185,7 +191,24 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['POST'], url_path='trade', url_name='survivors-trade')
     def trade(self, request):
-        ...
+        survivor1 = request.data['survivor1']['survivor']
+        survivor2 = request.data['survivor2']['survivor']
+
+        inventory1 = Inventory.objects.filter(
+            survivor_id=survivor1['id']).get()
+        inventory2 = Inventory.objects.filter(
+            survivor_id=survivor2['id']).get()
+
+        qtd_items2 = len(QuantityItem.objects.filter(
+            inventory_id=inventory2.id))
+        items1 = QuantityItem.objects.filter(
+            inventory_id=inventory1.id).update(inventory_id=inventory2.id)
+        items2 = QuantityItem.objects.filter(
+            inventory_id=inventory2.id).values('pk')[:qtd_items2]
+        QuantityItem.objects.filter(pk__in=items2).update(
+            inventory_id=inventory1.id)
+
+        return Response(status=status.HTTP_200_OK)
 
     def partial_update(self, request, pk=None):
         coordinates = request.data['coordinates']

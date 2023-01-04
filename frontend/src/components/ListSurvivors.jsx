@@ -52,10 +52,10 @@ const Survivors = () => {
     };
 
     const getItemsPerSurvivor = async () => {
-        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/items")
+        await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/items/")
             .then((response) => {
                 if (response.status == 200) {
-                    const items = response.data["average_items"];
+                    const items = response.data["averages_items"];
                     setWaterPerSurvivor(items["water_per_survivor"]);
                     setFoodPerSurvivor(items["food_per_survivor"]);
                     setMedicationPerSurvivor(items["medication_per_survivor"]);
@@ -79,7 +79,13 @@ const Survivors = () => {
     };
 
     const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        getPercentageInfected();
+        getPercentageHealthy();
+        getItemsPerSurvivor();
+        getPoints();
+        setOpen(true);
+    };
     const handleClose = () => setOpen(false);
 
     const navigate = useNavigate();
@@ -114,10 +120,6 @@ const Survivors = () => {
 
     useEffect(() => {
         document.title = "Survivors | List";
-        getPercentageInfected();
-        getPercentageHealthy();
-        getItemsPerSurvivor();
-        getPoints();
         getAllSurvivors();
     }, []);
 
