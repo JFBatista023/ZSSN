@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from api.models import Survivor, Inventory, Item, QuantityItem
-from api.serializers import SurvivorSerializer, InventorySerializer, QuantityItemSerializer
+from api.serializers import SurvivorSerializer, QuantityItemSerializer
 
 
 class SurvivorViewSet(ViewSet):
