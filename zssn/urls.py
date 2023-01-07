@@ -23,5 +23,5 @@ router.register(r'survivors', SurvivorViewSet, basename='survivor')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include(router.urls))
+    path('api/v1/', include((router.urls, 'api'), namespace='survivors'))
 ]
