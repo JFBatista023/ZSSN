@@ -140,3 +140,18 @@ class SurvivorTests(APITestCase):
         response_healthy = self.client.get(url_healthy)
         self.assertEqual(response_healthy.status_code, status.HTTP_200_OK)
         self.assertEqual(response_healthy.data['percentage_healthy'], "0%")
+
+    def test_average_items(self):
+        print(Survivor.objects.all())
+        url = reverse('api:survivor-survivors-info-items')
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            float(response.data['averages_items']['water_per_survivor']), 2.00)
+        self.assertEqual(
+            float(response.data['averages_items']['food_per_survivor']), 5.00)
+        self.assertEqual(
+            float(response.data['averages_items']['medication_per_survivor']), 2.00)
+        self.assertEqual(
+            float(response.data['averages_items']['ammo_per_survivor']), 0)
