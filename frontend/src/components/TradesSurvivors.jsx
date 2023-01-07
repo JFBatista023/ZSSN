@@ -1,12 +1,16 @@
-import { Autocomplete, Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Button, Chip, Typography } from "@mui/material";
+import { Autocomplete, Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Button, Chip, Typography, Snackbar } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import LocalDrinkIcon from "@mui/icons-material/LocalDrink";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import MedicationIcon from "@mui/icons-material/Medication";
 import { useNavigate } from "react-router-dom";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const TradesSurvivors = () => {
     const [survivors, setSurvivors] = useState([]);
@@ -14,6 +18,25 @@ const TradesSurvivors = () => {
     const [survivor2, setSurvivor2] = useState({});
 
     const [color, setColor] = useState("default");
+
+    const [openSnackbarSuccess, setOpenSnackbarSuccess] = useState(false);
+    const [openSnackbarError, setOpenSnackbarError] = useState(false);
+
+    const handleCloseSuccess = (event, reason) => {
+        if (reason === "clickaway") {
+            return;
+        }
+
+        setOpenSnackbarSuccess(false);
+    };
+
+    const handleCloseError = (event, reason) => {
+        if (reason === "clickaway") {
+            return;
+        }
+
+        setOpenSnackbarError(false);
+    };
 
     const [water1, setWater1] = useState(0);
     const [food1, setFood1] = useState(0);
@@ -29,15 +52,24 @@ const TradesSurvivors = () => {
 
     const [disabled2, setDisabled2] = useState(true);
 
+    const waterTotal1 = (survivor1.inventory?.items.water?.points_per_unit ?? 0) * water1;
+    const foodTotal1 = (survivor1.inventory?.items.food?.points_per_unit ?? 0) * food1;
+    const medicationTotal1 = (survivor1.inventory?.items.medication?.points_per_unit ?? 0) * medication1;
+    const ammoTotal1 = (survivor1.inventory?.items.ammo?.points_per_unit ?? 0) * ammo1;
+
+    const totalPoints1 = waterTotal1 + foodTotal1 + medicationTotal1 + ammoTotal1;
+
+    const waterTotal2 = (survivor2.inventory?.items.water?.points_per_unit ?? 0) * water2;
+    const foodTotal2 = (survivor2.inventory?.items.food?.points_per_unit ?? 0) * food2;
+    const medicationTotal2 = (survivor2.inventory?.items.medication?.points_per_unit ?? 0) * medication2;
+    const ammoTotal2 = (survivor2.inventory?.items.ammo?.points_per_unit ?? 0) * ammo2;
+
+    const totalPoints2 = waterTotal2 + foodTotal2 + medicationTotal2 + ammoTotal2;
+
     const navigate = useNavigate();
 
-    let totalPoints1 = 0;
-    let totalPoints2 = 0;
-
-    console.log(survivor1);
-
     const tradeItems = async () => {
-        if (survivor2.inventory?.items.total_points != survivor1.inventory?.items.total_points) {
+        if (totalPoints1 != totalPoints2) {
             setColor("error");
             return;
         }
@@ -45,14 +77,51 @@ const TradesSurvivors = () => {
         await axios.post("http://127.0.0.1:8000/api/v1/survivors/trade/", {
             "survivor1": survivor1,
             "survivor2": survivor2,
+            "items_to_trade_survivor1": {
+                "water": {
+                    "quantity": water1,
+                    "points": waterTotal1
+                },
+                "food": {
+                    "quantity": food1,
+                    "points": foodTotal1
+                },
+                "medication": {
+                    "quantity": medication1,
+                    "points": medicationTotal1
+                },
+                "ammo": {
+                    "quantity": ammo1,
+                    "points": ammoTotal1
+                }
+            },
+            "items_to_trade_survivor2": {
+                "water": {
+                    "quantity": water2,
+                    "points": waterTotal2
+                },
+                "food": {
+                    "quantity": food2,
+                    "points": foodTotal2
+                },
+                "medication": {
+                    "quantity": medication2,
+                    "points": medicationTotal2
+                },
+                "ammo": {
+                    "quantity": ammo2,
+                    "points": ammoTotal2
+                }
+            }
         }).then((response) => {
             if (response.status == 200) {
                 setColor("success");
+                setOpenSnackbarSuccess(true);
                 setTimeout(function() {
                     navigate("/");
                 }, 3000);
             } else {
-                console.log(response);
+                setOpenSnackbarError(true);
             }
         }).catch((e) => console.log(e));
     };
@@ -209,7 +278,7 @@ const TradesSurvivors = () => {
                         ></TextField>
                     </Box>
 
-                    <Chip color={color} size="medium" label={`Total Points: ${survivor1.inventory?.items.total_points ?? 0}`} />
+                    <Chip color={color} size="medium" label={`Total Points: ${totalPoints1}`} />
                 </Paper>
 
                 <Paper elevation={3} sx={{display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 2, width: "620px", height: "500px"}}>
@@ -318,10 +387,22 @@ const TradesSurvivors = () => {
                         ></TextField>
                     </Box>
 
-                    <Chip color={color} size="medium" label={`Total Points: ${survivor2.inventory?.items.total_points ?? 0}`} />
+                    <Chip color={color} size="medium" label={`Total Points: ${totalPoints2}`} />
                 </Paper>
             </Box>
             <Button sx={{ml: 80, mt: 5}} size="medium" color="primary" onClick={() => tradeItems()} variant="contained">Trade</Button>
+
+            <Snackbar open={openSnackbarSuccess} autoHideDuration={3000} onClose={handleCloseSuccess}>
+                <Alert onClose={handleCloseSuccess} severity="success" sx={{ width: "100%" }}>
+                    Trade Done!
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={openSnackbarError} autoHideDuration={3000} onClose={handleCloseError}>
+                <Alert onClose={handleCloseError} severity="error" sx={{ width: "100%" }}>
+                    Something is wrong on the trade. Check if the survivor has the items and quantity informed!
+                </Alert>
+            </Snackbar>
         </>
     );
 };
