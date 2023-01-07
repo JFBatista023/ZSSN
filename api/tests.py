@@ -93,3 +93,25 @@ class SurvivorTests(APITestCase):
         response = self.client.patch(url)
         self.assertEqual(response.data, {
                          'message': "Survivor is already infected. Keep distance from him!"})
+
+    def test_update_coordinates(self):
+        survivor_created = Survivor.objects.get()
+
+        url = reverse("api:survivor-detail",
+                      args=[survivor_created.pk])
+        data = {
+            "coordinates": {
+                "latitude": -5.0936,
+                "longitude": -42.8358
+            }
+        }
+
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        survivor_updated = Survivor.objects.get()
+
+        self.assertNotEqual(survivor_created.latitude,
+                            survivor_updated.latitude)
+        self.assertNotEqual(survivor_created.longitude,
+                            survivor_updated.longitude)
