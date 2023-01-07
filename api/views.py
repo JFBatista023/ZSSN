@@ -11,17 +11,29 @@ from api.serializers import SurvivorSerializer, QuantityItemSerializer
 class SurvivorViewSet(ViewSet):
 
     def list(self, request):
+        """
+        Get all survivors.
+        GET /api/v1/survivors/
+        """
         survivors = Survivor.objects.all()
         data = SurvivorSerializer(survivors, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path='healthys', url_name='survivors-healthy')
     def survivors_healthy(self, request):
+        """
+        Get only healthy survivors.
+        GET /api/v1/survivors/healthys/
+        """
         survivors = Survivor.objects.filter(is_infected=False)
         data = SurvivorSerializer(survivors, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
+        """
+        Get a survivor.
+        GET /api/v1/survivors/pk/
+        """
         survivor = Survivor.objects.filter(pk=pk)
         if survivor.exists():
             data = {}
@@ -47,6 +59,10 @@ class SurvivorViewSet(ViewSet):
         return Response({"message": "No survivors found."}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
+        """
+        Create survivor.
+        POST /api/v1/survivors/
+        """
         survivor = request.data['survivor']
         inventory_items = request.data['inventory']['items']
 
@@ -73,6 +89,10 @@ class SurvivorViewSet(ViewSet):
     # Just for insert mock data
     @action(detail=False, methods=['POST'], url_path='create-many', url_name='survivors-create-many')
     def create_many(self, request):
+        """
+        Create more than one survivor once.
+        POST /api/v1/survivors/create-many/
+        """
         survivors = request.data['survivors']
         for item in survivors:
             survivor = item['survivor']
@@ -97,12 +117,20 @@ class SurvivorViewSet(ViewSet):
     # Just for delete mock data
     @action(detail=False, methods=['DELETE'], url_path='delete-all', url_name='survivors-delete-all')
     def delete_all(self, request):
+        """
+        Delete all survivors.
+        DELETE /api/v1/survivors/delete-all/
+        """
         survivors = Survivor.objects.all()
         survivors.delete()
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PATCH'], url_path='report', url_name='survivors-report')
     def report(self, request, pk=None):
+        """
+        Report a survivor.
+        PATCH /api/v1/survivors/pk/report/
+        """
         survivor = Survivor.objects.filter(pk=pk)
         if survivor.exists():
             survivor = survivor.get()
@@ -120,6 +148,10 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'], url_path='info/infected', url_name='survivors-info-infected')
     def percentage_infected(self, request):
+        """
+        Get percentage of infecteds.
+        GET /api/v1/survivors/info/infected/
+        """
         survivors = Survivor.objects.all()
         survivors_infected = Survivor.objects.filter(is_infected=True)
 
@@ -130,6 +162,10 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'], url_path='info/healthy', url_name='survivors-info-healthy')
     def percentage_healthy(self, request):
+        """
+        Get percentage of healthy.
+        GET /api/v1/survivors/info/healthy/
+        """
         survivors = Survivor.objects.all()
         survivors_healthy = Survivor.objects.filter(is_infected=False)
 
@@ -140,6 +176,10 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'], url_path='info/items', url_name='survivors-info-items')
     def average_items(self, request):
+        """
+        Get average of items per survivor.
+        GET /api/v1/survivors/info/items/
+        """
         survivors_not_infected = Survivor.objects.filter(is_infected=False)
 
         quant_water = 0
@@ -175,6 +215,10 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['GET'], url_path='info/points', url_name='survivors-info-points')
     def points(self, request):
+        """
+        Get lost points and remaining points.
+        GET /api/v1/survivors/info/points/
+        """
         survivors_infected = Survivor.objects.filter(is_infected=True)
         survivors_not_infected = Survivor.objects.filter(is_infected=False)
 
@@ -198,6 +242,10 @@ class SurvivorViewSet(ViewSet):
 
     @action(detail=False, methods=['POST'], url_path='trade', url_name='survivors-trade')
     def trade(self, request):
+        """
+        Trade items between 2 healthy survivors.
+        POST /api/v1/survivors/trade/
+        """
         survivor1 = request.data['survivor1']['survivor']
         survivor2 = request.data['survivor2']['survivor']
 
@@ -218,6 +266,10 @@ class SurvivorViewSet(ViewSet):
         return Response(status=status.HTTP_200_OK)
 
     def partial_update(self, request, pk=None):
+        """
+        Update survivor coordinates.
+        PATCH /api/v1/survivors/
+        """
         coordinates = request.data['coordinates']
 
         survivor = Survivor.objects.filter(pk=pk)
@@ -232,6 +284,10 @@ class SurvivorViewSet(ViewSet):
         return Response({"message": "No survivors found."}, status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, pk=None):
+        """
+        Delete a survivor.
+        DELETE /api/v1/survivors/pk/
+        """
         survivor = Survivor.objects.filter(pk=pk)
         if survivor.exists():
             survivor = survivor.get()
