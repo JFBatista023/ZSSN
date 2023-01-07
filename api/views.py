@@ -177,7 +177,7 @@ class SurvivorViewSet(ViewSet):
     @action(detail=False, methods=['GET'], url_path='info/items', url_name='survivors-info-items')
     def average_items(self, request):
         """
-        Get average of items per survivor.
+        Get the approximate average of items per survivor.
         GET /api/v1/survivors/info/items/
         """
         survivors_not_infected = Survivor.objects.filter(is_infected=False)
@@ -207,10 +207,10 @@ class SurvivorViewSet(ViewSet):
         avg_ammo = quant_ammo / survivors_not_infected.count()
 
         return Response(data={"averages_items": {
-            "water_per_survivor": f"{avg_water:.2f}",
-            "food_per_survivor": f"{avg_food:.2f}",
-            "medication_per_survivor": f"{avg_medication:.2f}",
-            "ammo_per_survivor": f"{avg_ammo:.2f}",
+            "water_per_survivor": f"{round(avg_water)}",
+            "food_per_survivor": f"{round(avg_food)}",
+            "medication_per_survivor": f"{round(avg_medication)}",
+            "ammo_per_survivor": f"{round(avg_ammo)}",
         }}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path='info/points', url_name='survivors-info-points')

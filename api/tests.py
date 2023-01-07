@@ -147,13 +147,13 @@ class SurvivorTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            float(response.data['averages_items']['water_per_survivor']), 2.00)
+            int(response.data['averages_items']['water_per_survivor']), 2)
         self.assertEqual(
-            float(response.data['averages_items']['food_per_survivor']), 5.00)
+            int(response.data['averages_items']['food_per_survivor']), 5)
         self.assertEqual(
-            float(response.data['averages_items']['medication_per_survivor']), 2.00)
+            int(response.data['averages_items']['medication_per_survivor']), 2)
         self.assertEqual(
-            float(response.data['averages_items']['ammo_per_survivor']), 0)
+            int(response.data['averages_items']['ammo_per_survivor']), 0)
 
     def test_points(self):
         survivor_created = Survivor.objects.get()
