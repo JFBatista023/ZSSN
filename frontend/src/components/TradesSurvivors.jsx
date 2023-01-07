@@ -15,7 +15,26 @@ const TradesSurvivors = () => {
 
     const [color, setColor] = useState("default");
 
+    const [water1, setWater1] = useState(0);
+    const [food1, setFood1] = useState(0);
+    const [medication1, setMedication1] = useState(0);
+    const [ammo1, setAmmo1] = useState(0);
+
+    const [disabled1, setDisabled1] = useState(true);
+
+    const [water2, setWater2] = useState(0);
+    const [food2, setFood2] = useState(0);
+    const [medication2, setMedication2] = useState(0);
+    const [ammo2, setAmmo2] = useState(0);
+
+    const [disabled2, setDisabled2] = useState(true);
+
     const navigate = useNavigate();
+
+    let totalPoints1 = 0;
+    let totalPoints2 = 0;
+
+    console.log(survivor1);
 
     const tradeItems = async () => {
         if (survivor2.inventory?.items.total_points != survivor1.inventory?.items.total_points) {
@@ -39,6 +58,8 @@ const TradesSurvivors = () => {
     };
 
     const getSurvivor1 = async (id) => {
+        setDisabled1(false);
+
         await axios.get(`http://127.0.0.1:8000/api/v1/survivors/${id}/`)
             .then((response) => {
                 if (response.status == 200) {
@@ -51,6 +72,8 @@ const TradesSurvivors = () => {
     };
 
     const getSurvivor2 = async (id) => {
+        setDisabled2(false);
+
         await axios.get(`http://127.0.0.1:8000/api/v1/survivors/${id}/`)
             .then((response) => {
                 if (response.status == 200) {
@@ -144,6 +167,48 @@ const TradesSurvivors = () => {
                         </ListItem>
                     </List>
 
+                    <Box sx={{display: "flex", alignItems: "flex-start",flexDirection: "row", gap: 2}}>
+                        <TextField size="small" label="Quantity of Water" disabled={disabled1} value={water1 == 0 ? "" : water1} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setWater1(0);
+                                } else {
+                                    setWater1(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Food" disabled={disabled1} value={food1 == 0 ? "" : food1} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setFood1(0);
+                                } else {
+                                    setFood1(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                    </Box>
+
+                    <Box sx={{display: "flex", alignItems: "flex-start",flexDirection: "row", gap: 2}}>
+                        <TextField size="small" label="Quantity of Medication" disabled={disabled1} value={medication1 == 0 ? "" : medication1} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setMedication1(0);
+                                } else {
+                                    setMedication1(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Ammo" disabled={disabled1} value={ammo1 == 0 ? "" : ammo1} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setAmmo1(0);
+                                } else {
+                                    setAmmo1(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                    </Box>
+
                     <Chip color={color} size="medium" label={`Total Points: ${survivor1.inventory?.items.total_points ?? 0}`} />
                 </Paper>
 
@@ -210,6 +275,48 @@ const TradesSurvivors = () => {
                             <ListItemText primary={`${survivor2.inventory?.items.ammo?.quantity ?? 0}x Ammos`} secondary={`Points:${survivor2.inventory?.items.ammo?.total_points_item ?? 0}`} />
                         </ListItem>
                     </List>
+
+                    <Box sx={{display: "flex", alignItems: "flex-start",flexDirection: "row", gap: 2}}>
+                        <TextField size="small" label="Quantity of Water" disabled={disabled2} value={water2 == 0 ? "" : water2} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setWater2(0);
+                                } else {
+                                    setWater2(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Food" disabled={disabled2} value={food2 == 0 ? "" : food2} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setFood2(0);
+                                } else {
+                                    setFood2(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                    </Box>
+
+                    <Box sx={{display: "flex", alignItems: "flex-start",flexDirection: "row", gap: 2}}>
+                        <TextField size="small" label="Quantity of Medication" disabled={disabled2} value={medication2 == 0 ? "" : medication2} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setMedication2(0);
+                                } else {
+                                    setMedication2(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                        <TextField size="small" label="Quantity of Ammo" disabled={disabled2} value={ammo2 == 0 ? "" : ammo2} InputLabelProps={{shrink: true}}
+                            onChange={(event) => {
+                                if (event.target.value == "") {
+                                    setAmmo2(0);
+                                } else {
+                                    setAmmo2(event.target.value);
+                                }
+                            }}
+                        ></TextField>
+                    </Box>
 
                     <Chip color={color} size="medium" label={`Total Points: ${survivor2.inventory?.items.total_points ?? 0}`} />
                 </Paper>
