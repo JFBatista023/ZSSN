@@ -148,13 +148,18 @@ class SurvivorViewSet(ViewSet):
         quant_ammo = 0
         for survivor in survivors_not_infected:
             survivor_inventory = Inventory.objects.get(survivor_id=survivor.id)
-            survivor_items = survivor_inventory.items.all()
+            survivor_items = QuantityItem.objects.filter(
+                inventory_id=survivor_inventory.id)
 
-            quant_water += survivor_items.filter(name='water').count()
-            quant_food += survivor_items.filter(name='food').count()
-            quant_medication += survivor_items.filter(
-                name='medication').count()
-            quant_ammo += survivor_items.filter(name='ammo').count()
+            for item in survivor_items:
+                if item.item.name == 'water':
+                    quant_water += item.quantity
+                elif item.item.name == 'food':
+                    quant_food += item.quantity
+                elif item.item.name == 'medication':
+                    quant_medication += item.quantity
+                else:
+                    quant_ammo += item.quantity
 
         avg_water = quant_water / survivors_not_infected.count()
         avg_food = quant_food / survivors_not_infected.count()
