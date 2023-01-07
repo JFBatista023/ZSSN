@@ -115,3 +115,28 @@ class SurvivorTests(APITestCase):
                             survivor_updated.latitude)
         self.assertNotEqual(survivor_created.longitude,
                             survivor_updated.longitude)
+
+    def test_percentage_infected_and_healthy(self):
+        survivor_created = Survivor.objects.get()
+
+        url_infected = reverse("api:survivor-survivors-info-infected")
+        url_healthy = reverse("api:survivor-survivors-info-healthy")
+
+        response_infected = self.client.get(url_infected)
+        self.assertEqual(response_infected.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_infected.data['percentage_infected'], "0%")
+
+        response_healthy = self.client.get(url_healthy)
+        self.assertEqual(response_healthy.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_healthy.data['percentage_healthy'], "100%")
+
+        survivor_created.is_infected = True
+        survivor_created.save()
+
+        response_infected = self.client.get(url_infected)
+        self.assertEqual(response_infected.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_infected.data['percentage_infected'], "100%")
+
+        response_healthy = self.client.get(url_healthy)
+        self.assertEqual(response_healthy.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_healthy.data['percentage_healthy'], "0%")
