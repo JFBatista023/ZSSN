@@ -181,16 +181,18 @@ class SurvivorViewSet(ViewSet):
         lost_points = 0
         for infected in survivors_infected:
             infected_inventory = Inventory.objects.get(survivor_id=infected.id)
-            infected_items = infected_inventory.items.all()
-            lost_points += infected_items.aggregate(Sum('points'))[
-                'points__sum']
+            infected_items = QuantityItem.objects.filter(
+                inventory_id=infected_inventory.id)
+            lost_points += sum([item.quantity *
+                               item.item.points for item in infected_items])
 
         remaining_points = 0
         for survivor in survivors_not_infected:
             survivor_inventory = Inventory.objects.get(survivor_id=survivor.id)
-            survivor_items = survivor_inventory.items.all()
-            remaining_points += survivor_items.aggregate(Sum('points'))[
-                'points__sum']
+            survivor_items = QuantityItem.objects.filter(
+                inventory_id=survivor_inventory.id)
+            remaining_points += sum([item.quantity *
+                                    item.item.points for item in survivor_items])
 
         return Response(data={"lost_points": lost_points, "remaining_points": remaining_points}, status=status.HTTP_200_OK)
 
