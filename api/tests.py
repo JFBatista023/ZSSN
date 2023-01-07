@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.urls import reverse
 from api.models import Survivor, Inventory, QuantityItem, Item
@@ -14,8 +14,32 @@ class SurvivorTests(APITestCase):
             name='medication', points='2')
         cls.ammo = Item.objects.create(name='ammo', points='1')
 
-    def test_create_new_survivor(self):
+    def setUp(self):
+        url = reverse("api:survivor-list")
+        data = {
+            "survivor": {
+                "name": "Filipe Batista",
+                "age": 20,
+                "gender": "M",
+                "latitude": -5.0879,
+                "longitude": -42.8009,
+                "birth_date": "2002-08-17"
+            },
+            "inventory": {
+                "items": {
+                    "water": 2,
+                    "food": 5,
+                    "medication": 2
+                }
+            }
+        }
+
+        self.client.post(url, data, format='json')
+
+    def tearDown(self):
         Survivor.objects.all().delete()
+
+    def test_create_new_survivor(self):
         url = reverse("api:survivor-list")
         data = {
             "survivor": {
@@ -36,14 +60,36 @@ class SurvivorTests(APITestCase):
         }
 
         response = self.client.post(url, data, format='json')
+        survivor = Survivor.objects.get(pk=response.data['id'])
+        inventory = Inventory.objects.get(survivor_id=survivor.id)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Survivor.objects.count(), 1)
-        self.assertEqual(Survivor.objects.get().name, 'Filipe Batista')
-        self.assertEqual(Survivor.objects.get(),
-                         Inventory.objects.get().survivor)
-        self.assertFalse(Survivor.objects.get().is_infected)
-        for item in QuantityItem.objects.all():
+        self.assertEqual(survivor.name, 'Filipe Batista')
+        self.assertEqual(survivor, inventory.survivor)
+        self.assertFalse(survivor.is_infected)
+        for item in QuantityItem.objects.filter(inventory_id=inventory.id):
             if item.item.name == 'water' or item.item.name == 'medication':
                 self.assertEqual(item.quantity, 2)
             if item.item.name == 'food':
                 self.assertEqual(item.quantity, 5)
+
+    def test_report_survivor(self):
+        survivor_created = Survivor.objects.get()
+        self.assertFalse(survivor_created.is_infected)
+        self.assertEqual(survivor_created.reports, 0)
+
+        url = reverse("api:survivor-survivors-report",
+                      args=[survivor_created.pk])
+        self.client.patch(url)
+        self.client.patch(url)
+        response = self.client.patch(url)
+
+        survivor_updated = Survivor.objects.get()
+        self.assertTrue(survivor_updated.is_infected)
+        self.assertEqual(survivor_updated.reports, 3)
+        self.assertEqual(
+            response.data, {'message': "Survivor has been infected. Be careful!"})
+
+        response = self.client.patch(url)
+        self.assertEqual(response.data, {
+                         'message': "Survivor is already infected. Keep distance from him!"})
