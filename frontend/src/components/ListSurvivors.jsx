@@ -29,6 +29,13 @@ const Survivors = () => {
     const [lostPoints, setLostPoints] = useState(0);
     const [remainingPoints, setRemainingPoints] = useState(0);
 
+    const [openInfos, setOpenInfos] = useState(false);
+
+    const [modalData, setModalData] = useState({ open: false, survivorId: null});
+
+    const [latitude, setLatitude] = useState("");
+    const [longitude, setLongitude] = useState("");
+
     const getPercentageInfected = async () => {
         await axios.get("http://127.0.0.1:8000/api/v1/survivors/info/infected/")
             .then((response) => {
@@ -78,15 +85,21 @@ const Survivors = () => {
             }).catch((e) => console.log(e));
     };
 
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => {
+    const handleOpenCoordinates = (survivorId) => {
+        setModalData({open: true, survivorId: survivorId});
+    };
+    const handleCloseCoordinates = () => {
+        setModalData({open: false});
+    };
+
+    const handleOpenInfos = () => {
         getPercentageInfected();
         getPercentageHealthy();
         getItemsPerSurvivor();
         getPoints();
-        setOpen(true);
+        setOpenInfos(true);
     };
-    const handleClose = () => setOpen(false);
+    const handleCloseInfos = () => setOpenInfos(false);
 
     const navigate = useNavigate();
 
@@ -118,6 +131,24 @@ const Survivors = () => {
             }).catch((e) => console.log(e));
     };
 
+    const updateSurvivorCoordinates = async (survivorId) => {
+        await axios.patch(`http://127.0.0.1:8000/api/v1/survivors/${survivorId}/`, {
+            "coordinates": {
+                "latitude": latitude,
+                "longitude": longitude
+            }
+        }).then((response) => {
+            if (response.status == 200) {
+                getAllSurvivors();
+                setTimeout(function() {
+                    handleCloseCoordinates();
+                }, 2000);
+            } else {
+                console.log(response);
+            }
+        }).catch((e) => console.log(e));
+    };
+
     useEffect(() => {
         document.title = "Survivors | List";
         getAllSurvivors();
@@ -126,7 +157,7 @@ const Survivors = () => {
     return (
         <>
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "center", mt: 4, ml: 11, width: "950px", position: "absolute", top: 0, left: 0, right: 0}}>
-                <Button size="medium" color="info" sx={{mr: 3}} variant="contained" onClick={() => handleOpen()}>Infos</Button>
+                <Button size="medium" color="info" sx={{mr: 3}} variant="contained" onClick={() => handleOpenInfos()}>Infos</Button>
                 <Button size="medium" color="primary" sx={{mr: 3}} variant="contained" onClick={() => navigate("/trades")}>Trades</Button>
                 <Button size="medium" color="success" sx={{mr: 3}} variant="contained" onClick={() => navigate("/create")}>Create Survivor</Button>
 
@@ -211,7 +242,8 @@ const Survivors = () => {
 
                             </CardContent>
 
-                            <CardActions>
+                            <CardActions sx={{gap: 2}}>
+                                {survivor.is_infected ? null : <Button onClick={() => handleOpenCoordinates(survivor.id)} size="small" color="primary" variant="contained">Update Coordinates</Button>}
                                 {survivor.is_infected ? null : <Button onClick={() => reportSurvivor(survivor.id)} size="small" color="error" variant="contained">Report</Button>}
                             </CardActions>
 
@@ -221,8 +253,19 @@ const Survivors = () => {
             </Box>
 
             <Modal
-                open={open}
-                onClose={handleClose}
+                open={modalData.open}
+                onClose={handleCloseCoordinates}
+            >
+                <Box sx={style}>
+                    <Typography sx={{mb: 2, ml: 9}}>Update Coordinates of Survivor</Typography>
+                    <TextField fullWidth sx={{mb: 2}} label="Latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} />
+                    <TextField fullWidth label="Longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+                    <Button sx={{mt: 2, ml: 19}} onClick={() => updateSurvivorCoordinates(modalData.survivorId)} size="medium" color="primary" variant="contained">Update</Button>                </Box>
+            </Modal>
+
+            <Modal
+                open={openInfos}
+                onClose={handleCloseInfos}
             >
                 <Box sx={style}>
                     <Typography>Percentage of infected survivors: {percentageInfected}</Typography>
