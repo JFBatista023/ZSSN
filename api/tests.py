@@ -175,3 +175,156 @@ class SurvivorTests(APITestCase):
             int(response.data['lost_points']), 27)
         self.assertEqual(
             int(response.data['remaining_points']), 0)
+
+    def test_trade(self):
+        Survivor.objects.all().delete()
+        url = reverse('api:survivor-survivors-create-many')
+        data = {
+            "survivors": [
+                {
+                    "survivor": {
+                        "name": "Filipe Batista",
+                        "age": 20,
+                        "gender": "M",
+                                "latitude": -5.0879,
+                                "longitude": -42.8009,
+                                "birth_date": "2002-08-17"
+                    },
+                    "inventory": {
+                        "items": {
+                            "water": 2,
+                            "medication": 3,
+                            "food": 2
+                        }
+                    }
+                },
+                {
+                    "survivor": {
+                        "name": "João Silva",
+                        "age": 22,
+                        "gender": "M",
+                                "latitude": -54.0879,
+                                "longitude": -12.8009,
+                                "birth_date": "2000-09-27"
+                    },
+                    "inventory": {
+                        "items": {
+                            "water": 3,
+                            "medication": 4,
+                            "ammo": 4
+                        }
+                    }
+                }
+            ]
+        }
+
+        self.client.post(url, data, format='json')
+
+        url = reverse('api:survivor-survivors-trade')
+        data = {
+            "survivor1": {
+                "survivor": {
+                    "id": Survivor.objects.get(name='Filipe Batista').pk,
+                    "name": "Filipe Batista",
+                    "age": 20,
+                    "gender": "M",
+                    "is_infected": 'false',
+                    "reports": 0,
+                    "latitude": "-5.0879",
+                    "longitude": "-42.8009",
+                    "birth_date": "2002-08-17",
+                    "registered_at": "2023-01-07T12:05:26.001866",
+                    "infected_at": 'null'
+                }
+            },
+            "survivor2": {
+                "survivor": {
+                    "id": Survivor.objects.get(name='João Silva').pk,
+                    "name": "João Silva",
+                    "age": 22,
+                    "gender": "M",
+                    "is_infected": 'false',
+                    "reports": 0,
+                    "latitude": "-54.0879",
+                    "longitude": "-12.8009",
+                    "birth_date": "2000-09-27",
+                    "registered_at": "2023-01-07T12:05:26.035648",
+                    "infected_at": 'null'
+                }
+            },
+            "items_to_trade_survivor1": {
+                "water": 1,
+                "food": 2,
+                "medication": 0,
+                "ammo": 0
+            },
+            "items_to_trade_survivor2": {
+                "water": 0,
+                "food": 0,
+                "medication": 3,
+                "ammo": 4
+            }
+        }
+
+        items_before_1 = QuantityItem.objects.filter(inventory_id=Inventory.objects.get(
+            survivor_id=Survivor.objects.get(name='Filipe Batista').pk))
+        items_before_2 = QuantityItem.objects.filter(inventory_id=Inventory.objects.get(
+            survivor_id=Survivor.objects.get(name='João Silva').pk))
+
+        items_1 = {item.item.name: item.quantity for item in items_before_1}
+        items_2 = {item.item.name: item.quantity for item in items_before_2}
+
+        self.assertTrue('food' in items_1.keys())
+        self.assertTrue('ammo' in items_2.keys())
+
+        self.assertFalse('ammo' in items_1.keys())
+        self.assertFalse('food' in items_2.keys())
+
+        for item_name, item_quantity in items_1.items():
+            if item_name == 'water':
+                self.assertEqual(item_quantity, 2)
+            if item_name == 'medication':
+                self.assertEqual(item_quantity, 3)
+            if item_name == 'food':
+                self.assertEqual(item_quantity, 2)
+
+        for item_name, item_quantity in items_2.items():
+            if item_name == 'water':
+                self.assertEqual(item_quantity, 3)
+            if item_name == 'medication':
+                self.assertEqual(item_quantity, 4)
+            if item_name == 'ammo':
+                self.assertEqual(item_quantity, 4)
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        items_after_1 = QuantityItem.objects.filter(inventory_id=Inventory.objects.get(
+            survivor_id=Survivor.objects.get(name='Filipe Batista').pk))
+        items_after_2 = QuantityItem.objects.filter(inventory_id=Inventory.objects.get(
+            survivor_id=Survivor.objects.get(name='João Silva').pk))
+
+        items_1 = {item.item.name: item.quantity for item in items_after_1}
+        items_2 = {item.item.name: item.quantity for item in items_after_2}
+
+        self.assertFalse('food' in items_1.keys())
+        self.assertFalse('ammo' in items_2.keys())
+
+        self.assertTrue('ammo' in items_1.keys())
+        self.assertTrue('food' in items_2.keys())
+
+        for item_name, item_quantity in items_1.items():
+            if item_name == 'water':
+                self.assertEqual(item_quantity, 1)
+            if item_name == 'medication':
+                self.assertEqual(item_quantity, 6)
+            if item_name == 'ammo':
+                self.assertEqual(item_quantity, 4)
+
+        for item_name, item_quantity in items_2.items():
+            if item_name == 'water':
+                self.assertEqual(item_quantity, 4)
+            if item_name == 'medication':
+                self.assertEqual(item_quantity, 1)
+            if item_name == 'food':
+                self.assertEqual(item_quantity, 2)
