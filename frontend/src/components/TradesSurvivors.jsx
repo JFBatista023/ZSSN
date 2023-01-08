@@ -52,19 +52,19 @@ const TradesSurvivors = () => {
 
     const [disabled2, setDisabled2] = useState(true);
 
-    const waterTotal1 = (survivor1.inventory?.items.water?.points_per_unit ?? 0) * water1;
-    const foodTotal1 = (survivor1.inventory?.items.food?.points_per_unit ?? 0) * food1;
-    const medicationTotal1 = (survivor1.inventory?.items.medication?.points_per_unit ?? 0) * medication1;
-    const ammoTotal1 = (survivor1.inventory?.items.ammo?.points_per_unit ?? 0) * ammo1;
+    let waterTotal1 = (survivor1.inventory?.items.water?.points_per_unit ?? 0) * water1;
+    let foodTotal1 = (survivor1.inventory?.items.food?.points_per_unit ?? 0) * food1;
+    let medicationTotal1 = (survivor1.inventory?.items.medication?.points_per_unit ?? 0) * medication1;
+    let ammoTotal1 = (survivor1.inventory?.items.ammo?.points_per_unit ?? 0) * ammo1;
 
-    const totalPoints1 = waterTotal1 + foodTotal1 + medicationTotal1 + ammoTotal1;
+    let totalPoints1 = waterTotal1 + foodTotal1 + medicationTotal1 + ammoTotal1;
 
-    const waterTotal2 = (survivor2.inventory?.items.water?.points_per_unit ?? 0) * water2;
-    const foodTotal2 = (survivor2.inventory?.items.food?.points_per_unit ?? 0) * food2;
-    const medicationTotal2 = (survivor2.inventory?.items.medication?.points_per_unit ?? 0) * medication2;
-    const ammoTotal2 = (survivor2.inventory?.items.ammo?.points_per_unit ?? 0) * ammo2;
+    let waterTotal2 = (survivor2.inventory?.items.water?.points_per_unit ?? 0) * water2;
+    let foodTotal2 = (survivor2.inventory?.items.food?.points_per_unit ?? 0) * food2;
+    let medicationTotal2 = (survivor2.inventory?.items.medication?.points_per_unit ?? 0) * medication2;
+    let ammoTotal2 = (survivor2.inventory?.items.ammo?.points_per_unit ?? 0) * ammo2;
 
-    const totalPoints2 = waterTotal2 + foodTotal2 + medicationTotal2 + ammoTotal2;
+    let totalPoints2 = waterTotal2 + foodTotal2 + medicationTotal2 + ammoTotal2;
 
     const navigate = useNavigate();
 
@@ -78,52 +78,27 @@ const TradesSurvivors = () => {
             "survivor1": survivor1,
             "survivor2": survivor2,
             "items_to_trade_survivor1": {
-                "water": {
-                    "quantity": water1,
-                    "points": waterTotal1
-                },
-                "food": {
-                    "quantity": food1,
-                    "points": foodTotal1
-                },
-                "medication": {
-                    "quantity": medication1,
-                    "points": medicationTotal1
-                },
-                "ammo": {
-                    "quantity": ammo1,
-                    "points": ammoTotal1
-                }
+                "water": water1,
+                "food": food1,
+                "medication": medication1,
+                "ammo": ammo1
             },
             "items_to_trade_survivor2": {
-                "water": {
-                    "quantity": water2,
-                    "points": waterTotal2
-                },
-                "food": {
-                    "quantity": food2,
-                    "points": foodTotal2
-                },
-                "medication": {
-                    "quantity": medication2,
-                    "points": medicationTotal2
-                },
-                "ammo": {
-                    "quantity": ammo2,
-                    "points": ammoTotal2
-                }
+                "water": water2,
+                "food": food2,
+                "medication": medication2,
+                "ammo": ammo2
             }
         }).then((response) => {
+            console.log(response.status);
             if (response.status == 200) {
                 setColor("success");
                 setOpenSnackbarSuccess(true);
                 setTimeout(function() {
                     navigate("/");
                 }, 3000);
-            } else {
-                setOpenSnackbarError(true);
             }
-        }).catch((e) => console.log(e));
+        }).catch(() => setOpenSnackbarError(true));
     };
 
     const getSurvivor1 = async (id) => {
@@ -398,9 +373,9 @@ const TradesSurvivors = () => {
                 </Alert>
             </Snackbar>
 
-            <Snackbar open={openSnackbarError} autoHideDuration={3000} onClose={handleCloseError}>
+            <Snackbar open={openSnackbarError} autoHideDuration={5000} onClose={handleCloseError}>
                 <Alert onClose={handleCloseError} severity="error" sx={{ width: "100%" }}>
-                    Something is wrong on the trade. Check if the survivor has the items and quantity informed!
+                    Something is wrong in trading. Check if the survivors has the specified trade items and quantity!
                 </Alert>
             </Snackbar>
         </>

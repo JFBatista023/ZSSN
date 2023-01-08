@@ -1,5 +1,4 @@
 from datetime import datetime
-from django.db.models import Sum
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -246,15 +245,15 @@ class SurvivorViewSet(ViewSet):
         Trade items between 2 healthy survivors.
         POST /api/v1/survivors/trade/
         """
-        survivor1 = request.data['survivor1']
-        survivor2 = request.data['survivor2']
+        survivor1 = request.data['survivor1']['survivor']
+        survivor2 = request.data['survivor2']['survivor']
         items_trade1 = request.data['items_to_trade_survivor1']
         items_trade2 = request.data['items_to_trade_survivor2']
 
-        items_trade1 = {items_name: values['quantity'] for items_name,
-                        values in items_trade1.items() if values['quantity'] != 0}
-        items_trade2 = {items_name: values['quantity'] for items_name,
-                        values in items_trade2.items() if values['quantity'] != 0}
+        items_trade1 = {items_name: int(quantity) for items_name,
+                        quantity in items_trade1.items() if quantity != 0}
+        items_trade2 = {items_name: int(quantity) for items_name,
+                        quantity in items_trade2.items() if quantity != 0}
 
         inventory1 = Inventory.objects.filter(
             survivor_id=survivor1['id']).get()
@@ -270,37 +269,51 @@ class SurvivorViewSet(ViewSet):
         if not all(True if k in items_names1.keys() and items_trade1[k] <= items_names1[k] else False for k in items_trade1.keys()) or not all(True if k in items_names2.keys() and items_trade2[k] <= items_names2[k] else False for k in items_trade2.keys()):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # First Usecase: Both survivors have the same items
-        if all(True if k in items_names2.keys() else False for k in items_trade1.keys()) and all(True if k in items_names1.keys() else False for k in items_trade2.keys()):
-            for item_name, quantity in items_trade1.items():
-                for item1 in items1:
-                    if item1.item.name == item_name:
-                        if item1.quantity - quantity == 0:
+        for item_name, quantity in items_trade1.items():
+            for item1 in items1:
+                if item1.item.name == item_name:
+                    if item1.quantity - quantity == 0:
+                        if item1.item.name not in items_names2.keys():
+                            QuantityItem.objects.filter(inventory_id=inventory1.id, item_id=Item.objects.get(
+                                name=item1.item.name).pk).update(inventory_id=inventory2.id)
+                        else:
                             for item2 in items2:
                                 if item2.item.name == item_name:
                                     item2.quantity += quantity
                                     item2.save()
                             item1.delete()
+                    else:
+                        item1.quantity -= quantity
+                        item1.save()
+                        if item1.item.name not in items_names2.keys():
+                            QuantityItem.objects.create(
+                                quantity=quantity, inventory_id=inventory2.id, item_id=Item.objects.get(name=item1.item.name).pk)
                         else:
-                            item1.quantity -= quantity
-                            item1.save()
                             for item2 in items2:
                                 if item2.item.name == item_name:
                                     item2.quantity += quantity
                                     item2.save()
 
-            for item_name, quantity in items_trade2.items():
-                for item2 in items2:
-                    if item2.item.name == item_name:
-                        if item2.quantity - quantity == 0:
+        for item_name, quantity in items_trade2.items():
+            for item2 in items2:
+                if item2.item.name == item_name:
+                    if item2.quantity - quantity == 0:
+                        if item2.item.name not in items_names1.keys():
+                            QuantityItem.objects.filter(inventory_id=inventory2.id, item_id=Item.objects.get(
+                                name=item2.item.name).pk).update(inventory_id=inventory1.id)
+                        else:
                             for item1 in items1:
                                 if item1.item.name == item_name:
                                     item1.quantity += quantity
                                     item1.save()
                             item2.delete()
+                    else:
+                        item2.quantity -= quantity
+                        item2.save()
+                        if item2.item.name not in items_names1.keys():
+                            QuantityItem.objects.create(
+                                quantity=quantity, inventory_id=inventory1.id, item_id=Item.objects.get(name=item2.item.name).pk)
                         else:
-                            item2.quantity -= quantity
-                            item2.save()
                             for item1 in items1:
                                 if item1.item.name == item_name:
                                     item1.quantity += quantity
