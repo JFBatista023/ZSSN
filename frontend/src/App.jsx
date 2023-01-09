@@ -6,7 +6,7 @@ import TradesSurvivors from "./components/TradesSurvivors";
 const App = () => {
     return (
         <Routes>
-            <Route path="/survivors">
+            <Route path="/">
                 <Route index element={<ListSurvivors />}/>
                 <Route path="/create" element={<CreateSurvivor />}/>
                 <Route path="/trades" element={<TradesSurvivors />} />
