@@ -8,6 +8,8 @@ class Survivor(models.Model):
     )
 
     name = models.CharField(max_length=200)
+    email = models.EmailField(unique=True, blank=True)
+    password = models.CharField(max_length=200, blank=True)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     is_infected = models.BooleanField(default=False, blank=True)

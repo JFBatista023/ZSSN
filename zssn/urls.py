@@ -16,12 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.views import SurvivorViewSet
+from api.views import SurvivorRegisterViewSet, SurvivorViewSet, EmailTokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
-router.register(r'survivors', SurvivorViewSet, basename='survivor')
+router.register(r"survivors", SurvivorViewSet, basename="survivor")
+router.register(r"register", SurvivorRegisterViewSet, basename="register")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include((router.urls, 'api'), namespace='survivors'))
+    path("admin/", admin.site.urls),
+    path("api/v1/", include((router.urls, "api"), namespace="survivors")),
+    path("api/v1/token/", EmailTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/v1/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
