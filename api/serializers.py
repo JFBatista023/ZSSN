@@ -7,8 +7,6 @@ from rest_framework import exceptions
 
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = "email"
-
     def validate(self, attrs):
         email = attrs.get("email")
         password = attrs.get("password")
@@ -38,7 +36,6 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(survivor)
 
         token["name"] = survivor.name
-        token["id"] = survivor.pk
 
         return token
 
@@ -62,19 +59,7 @@ class SurvivorAuthSerializer(serializers.ModelSerializer):
 class SurvivorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Survivor
-        fields = [
-            "id",
-            "name",
-            "age",
-            "gender",
-            "is_infected",
-            "reports",
-            "latitude",
-            "longitude",
-            "birth_date",
-            "registered_at",
-            "infected_at",
-        ]
+        exclude = ["email", "password"]
 
 
 class QuantityItemSerializer(serializers.ModelSerializer):

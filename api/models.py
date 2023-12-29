@@ -1,15 +1,17 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
 
 
-class Survivor(models.Model):
+class Survivor(AbstractBaseUser):
     GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
+        ("M", "Male"),
+        ("F", "Female"),
     )
+
+    USERNAME_FIELD = "email"
 
     name = models.CharField(max_length=200)
     email = models.EmailField(unique=True, blank=True)
-    password = models.CharField(max_length=200, blank=True)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     is_infected = models.BooleanField(default=False, blank=True)
@@ -27,10 +29,10 @@ class Item(models.Model):
 
 
 class Inventory(models.Model):
-    survivor = models.OneToOneField(
-        Survivor, on_delete=models.CASCADE)
+    survivor = models.OneToOneField(Survivor, on_delete=models.CASCADE)
     items = models.ManyToManyField(
-        Item, through='QuantityItem', through_fields=('inventory', 'item'))
+        Item, through="QuantityItem", through_fields=("inventory", "item")
+    )
 
 
 class QuantityItem(models.Model):

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 import environ
 
@@ -118,12 +119,18 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Django REST configuration
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication"
-    )
+    ]
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 AUTHENTICATION_BACKENDS = ["api.auth_email.EmailBackend"]
+AUTH_USER_MODEL = "api.Survivor"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
