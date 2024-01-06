@@ -9,15 +9,33 @@ import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import api from "../utils/api/api";
+import useAuthStore from "../utils/stores/authStore";
 
 export default function SignInForm() {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get("email"),
-            password: data.get("password"),
-        });
+    const { register, handleSubmit } = useForm();
+    const { login } = useAuthStore();
+    const navigate = useNavigate();
+
+    const loginSurvivor = async (email, password) => {
+        await api
+            .post("/api/v1/token/", {
+                email,
+                password,
+            })
+            .then((response) => {
+                login(response.data.access, response.data.refresh);
+                navigate("../");
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    const onSubmit = async (data) => {
+        loginSurvivor(data.email, data.password);
     };
 
     return (
@@ -39,7 +57,7 @@ export default function SignInForm() {
                 </Typography>
                 <Box
                     component="form"
-                    onSubmit={handleSubmit}
+                    onSubmit={handleSubmit(onSubmit)}
                     noValidate
                     sx={{ mt: 1 }}
                 >
@@ -50,6 +68,8 @@ export default function SignInForm() {
                         id="email"
                         label="Email"
                         name="email"
+                        type="email"
+                        {...register("email")}
                         autoFocus
                     />
                     <TextField
@@ -60,6 +80,7 @@ export default function SignInForm() {
                         label="Password"
                         type="password"
                         id="password"
+                        {...register("password")}
                     />
 
                     <Button

@@ -1,4 +1,5 @@
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -9,15 +10,68 @@ import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import { Controller, useForm } from "react-hook-form";
+import api from "../utils/api/api";
 
 export default function SignUpForm() {
-    const handleSubmit = (event) => {
+    const { register, handleSubmit, control } = useForm();
+
+    const createSurvivor = async (
+        name,
+        email,
+        age,
+        gender,
+        latitude,
+        longitude,
+        password,
+        birth_date,
+        water,
+        food,
+        medication
+    ) => {
+        await api
+            .post("/api/v1/register/", {
+                survivor: {
+                    name,
+                    email,
+                    password,
+                    age,
+                    gender,
+                    latitude,
+                    longitude,
+                    birth_date,
+                },
+                inventory: {
+                    items: {
+                        water,
+                        food,
+                        medication,
+                    },
+                },
+            })
+            .then((response) => {
+                console.log(response.status);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    const onSubmit = async (event, data) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get("email"),
-            password: data.get("password"),
-        });
+        createSurvivor(
+            data.name,
+            data.email,
+            data.age,
+            data.gender,
+            data.latitude,
+            data.longitude,
+            data.password,
+            data.birth_date,
+            data.water,
+            data.food,
+            data.medication
+        );
     };
 
     return (
@@ -35,12 +89,12 @@ export default function SignUpForm() {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
-                    Sign up
+                    Register
                 </Typography>
                 <Box
                     component="form"
                     noValidate
-                    onSubmit={handleSubmit}
+                    onSubmit={handleSubmit(onSubmit)}
                     sx={{ mt: 3 }}
                 >
                     <Grid container spacing={2}>
@@ -52,6 +106,7 @@ export default function SignUpForm() {
                                 id="name"
                                 label="Name"
                                 autoFocus
+                                {...register("name")}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -62,6 +117,7 @@ export default function SignUpForm() {
                                 label="Age"
                                 name="age"
                                 type="number"
+                                {...register("age")}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -72,6 +128,7 @@ export default function SignUpForm() {
                                 id="latitude"
                                 label="Latitude"
                                 type="number"
+                                {...register("latitude")}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -82,18 +139,67 @@ export default function SignUpForm() {
                                 label="Longitude"
                                 name="longitude"
                                 type="number"
+                                {...register("longitude")}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Controller
+                                control={control}
+                                name="ReactDatepicker"
+                                defaultValue=""
+                                render={({ field }) => (
+                                    <FormControl fullWidth>
+                                        <InputLabel>Gender</InputLabel>
+                                        <Select
+                                            label="Gender"
+                                            required
+                                            defaultValue=""
+                                            {...field}
+                                        >
+                                            <MenuItem value="M">Male</MenuItem>
+                                            <MenuItem value="F">
+                                                Female
+                                            </MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                )}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
                                 fullWidth
-                                id="gender"
-                                label="Gender"
-                                name="gender"
+                                id="water quantity"
+                                label="Water Quantity"
+                                name="water quantity"
+                                type="number"
+                                {...register("water")}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="food quantity"
+                                label="Food Quantity"
+                                name="food quantity"
+                                type="number"
+                                {...register("food")}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="medication quantity"
+                                label="Medication Quantity"
+                                name="medication quantity"
+                                type="number"
+                                {...register("medication")}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
                             <TextField
                                 name="birth date"
                                 required
@@ -104,9 +210,9 @@ export default function SignUpForm() {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                {...register("birth_date")}
                             />
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -114,6 +220,8 @@ export default function SignUpForm() {
                                 id="email"
                                 label="Email"
                                 name="email"
+                                type="email"
+                                {...register("email")}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -124,6 +232,7 @@ export default function SignUpForm() {
                                 label="Password"
                                 type="password"
                                 id="password"
+                                {...register("password")}
                             />
                         </Grid>
                     </Grid>
@@ -133,7 +242,7 @@ export default function SignUpForm() {
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        Sign Up
+                        Register
                     </Button>
                     <Grid container justifyContent="flex-end">
                         <Grid item>
