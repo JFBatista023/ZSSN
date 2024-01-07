@@ -11,11 +11,11 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import axios from "axios";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/api/api";
+import { api } from "../utils/api/api";
+import useAuthStore from "../utils/stores/authStore";
 
 const style = {
     position: "absolute",
@@ -51,6 +51,9 @@ const Survivors = () => {
 
     const [latitude, setLatitude] = useState("");
     const [longitude, setLongitude] = useState("");
+
+    const { logout, username } = useAuthStore();
+    console.log(username);
 
     const getPercentageInfected = async () => {
         await api
@@ -134,8 +137,8 @@ const Survivors = () => {
     };
 
     const getAllSurvivors = async () => {
-        await axios
-            .get("http://127.0.0.1:8000/api/v1/survivors")
+        await api
+            .get("api/v1/survivors")
             .then((response) => {
                 if (response.status == 200) {
                     const sortedSurvivors = sortSurvivors(response.data);
@@ -150,10 +153,8 @@ const Survivors = () => {
     };
 
     const reportSurvivor = async (survivorId) => {
-        await axios
-            .patch(
-                `http://127.0.0.1:8000/api/v1/survivors/${survivorId}/report/`
-            )
+        await api
+            .patch(`api/v1/survivors/${survivorId}/report/`)
             .then((response) => {
                 if (response.status == 200) {
                     getAllSurvivors();
@@ -165,8 +166,8 @@ const Survivors = () => {
     };
 
     const updateSurvivorCoordinates = async (survivorId) => {
-        await axios
-            .patch(`http://127.0.0.1:8000/api/v1/survivors/${survivorId}/`, {
+        await api
+            .patch(`api/v1/survivors/${survivorId}/`, {
                 coordinates: {
                     latitude: latitude,
                     longitude: longitude,
@@ -226,12 +227,14 @@ const Survivors = () => {
                 </Button>
                 <Button
                     size="medium"
-                    color="success"
+                    color="error"
                     sx={{ mr: 3 }}
                     variant="contained"
-                    onClick={() => navigate("/create")}
+                    onClick={() => {
+                        logout();
+                    }}
                 >
-                    Create Survivor
+                    Logout
                 </Button>
 
                 <Autocomplete
@@ -378,7 +381,8 @@ const Survivors = () => {
                             </CardContent>
 
                             <CardActions sx={{ gap: 2 }}>
-                                {survivor.is_infected ? null : (
+                                {survivor.is_infected ||
+                                username != survivor.name ? null : (
                                     <Button
                                         onClick={() =>
                                             handleOpenCoordinates(survivor.id)
@@ -395,6 +399,7 @@ const Survivors = () => {
                                         onClick={() =>
                                             reportSurvivor(survivor.id)
                                         }
+                                        sx={{ ml: 24 }}
                                         size="small"
                                         color="error"
                                         variant="contained"

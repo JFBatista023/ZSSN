@@ -11,10 +11,12 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
-import api from "../utils/api/api";
+import { useNavigate } from "react-router-dom";
+import { api } from "../utils/api/api";
 
 export default function SignUpForm() {
     const { register, handleSubmit, control } = useForm();
+    const navigate = useNavigate();
 
     const createSurvivor = async (
         name,
@@ -50,15 +52,16 @@ export default function SignUpForm() {
                 },
             })
             .then((response) => {
-                console.log(response.status);
+                if (response.status == 201) {
+                    navigate("/survivors/login");
+                }
             })
             .catch((error) => {
                 console.log(error);
             });
     };
 
-    const onSubmit = async (event, data) => {
-        event.preventDefault();
+    const onSubmit = async (data) => {
         createSurvivor(
             data.name,
             data.email,
@@ -145,7 +148,7 @@ export default function SignUpForm() {
                         <Grid item xs={12} sm={6}>
                             <Controller
                                 control={control}
-                                name="ReactDatepicker"
+                                name="gender"
                                 defaultValue=""
                                 render={({ field }) => (
                                     <FormControl fullWidth>
@@ -246,7 +249,7 @@ export default function SignUpForm() {
                     </Button>
                     <Grid container justifyContent="flex-end">
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link href="/survivors/login" variant="body2">
                                 Sign in
                             </Link>
                         </Grid>

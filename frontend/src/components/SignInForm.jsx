@@ -11,7 +11,8 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/api/api";
+import { api } from "../utils/api/api";
+import { getUsernameFromToken } from "../utils/auth/getUsernameFromToken";
 import useAuthStore from "../utils/stores/authStore";
 
 export default function SignInForm() {
@@ -26,7 +27,11 @@ export default function SignInForm() {
                 password,
             })
             .then((response) => {
-                login(response.data.access, response.data.refresh);
+                login(
+                    response.data.access,
+                    response.data.refresh,
+                    getUsernameFromToken(response.data.access)
+                );
                 navigate("../");
             })
             .catch((error) => {
@@ -93,7 +98,7 @@ export default function SignInForm() {
                     </Button>
                     <Grid container>
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link href="/survivors/register" variant="body2">
                                 {"Sign Up"}
                             </Link>
                         </Grid>

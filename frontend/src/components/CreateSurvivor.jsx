@@ -1,7 +1,7 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import api from "../utils/api/api";
+import { api } from "../utils/api/api";
 
 const CreateSurvivor = () => {
     const [name, setName] = useState("");

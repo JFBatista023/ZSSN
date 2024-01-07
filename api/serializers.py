@@ -1,9 +1,9 @@
-from django.contrib.auth.hashers import make_password
-from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from api.models import Survivor, Inventory, Item, QuantityItem
 from django.contrib.auth import authenticate
-from rest_framework import exceptions
+from django.contrib.auth.hashers import make_password
+from rest_framework import exceptions, serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from api.models import Inventory, Item, QuantityItem, Survivor
 
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -35,7 +35,7 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, survivor):
         token = super().get_token(survivor)
 
-        token["name"] = survivor.name
+        token["username"] = survivor.name
 
         return token
 

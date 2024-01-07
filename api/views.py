@@ -1,17 +1,19 @@
 from datetime import datetime
+
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ViewSet
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
-from api.models import Survivor, Inventory, Item, QuantityItem
+
+from api.models import Inventory, Item, QuantityItem, Survivor
 from api.serializers import (
-    SurvivorSerializer,
-    SurvivorAuthSerializer,
-    QuantityItemSerializer,
     EmailTokenObtainPairSerializer,
+    QuantityItemSerializer,
+    SurvivorAuthSerializer,
+    SurvivorSerializer,
 )
 
 
@@ -173,6 +175,7 @@ class SurvivorViewSet(ViewSet):
         survivors.delete()
         return Response(status=status.HTTP_200_OK)
 
+    @transaction.atomic
     @action(
         detail=True, methods=["PATCH"], url_path="report", url_name="survivors-report"
     )
@@ -340,6 +343,7 @@ class SurvivorViewSet(ViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @transaction.atomic
     @action(
         detail=False, methods=["POST"], url_path="trade", url_name="survivors-trade"
     )
@@ -448,6 +452,7 @@ class SurvivorViewSet(ViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
+    @transaction.atomic
     def partial_update(self, request, pk=None):
         """
         Update survivor coordinates.
@@ -468,6 +473,7 @@ class SurvivorViewSet(ViewSet):
             {"message": "No survivors found."}, status=status.HTTP_404_NOT_FOUND
         )
 
+    @transaction.atomic
     def destroy(self, request, pk=None):
         """
         Delete a survivor.

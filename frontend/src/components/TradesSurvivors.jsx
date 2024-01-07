@@ -20,7 +20,7 @@ import LocalDrinkIcon from "@mui/icons-material/LocalDrink";
 import MedicationIcon from "@mui/icons-material/Medication";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/api/api";
+import { api } from "../utils/api/api";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
